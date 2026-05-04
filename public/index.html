@@ -520,20 +520,6 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   }
 });
 
-async function checkAlreadyVoted() {
-  try {
-    const res = await fetch('/api/check-voted');
-    const { voted } = await res.json();
-    if (voted) {
-      document.getElementById('submitBtn').disabled = true;
-      const msgEl = document.getElementById('msg');
-      msgEl.className = 'msg error';
-      msgEl.textContent = 'Вече сте гласували. Може да гласувате само веднъж.';
-    }
-  } catch (e) {}
-}
-
-checkAlreadyVoted();
 renderPlayerList();
 renderSlots();
 </script>
