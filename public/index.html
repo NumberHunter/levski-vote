@@ -498,7 +498,14 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
 
     if (res.ok) {
       msgEl.className = 'msg success';
-      msgEl.textContent = '✓ Вашият глас е записан! Благодарим ви.';
+      msgEl.innerHTML = `
+        <div style="font-size:1.6rem;font-weight:900;letter-spacing:1px;margin-bottom:16px;">ЛЕЕЕЕВСКИ ШАМПИОООООН!!!</div>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <img src="/lsfc3.gif" style="width:180px;border-radius:10px;" />
+          <img src="/lsfc3.gif" style="width:180px;border-radius:10px;" />
+          <img src="/lsfc3.gif" style="width:180px;border-radius:10px;" />
+        </div>
+      `;
       document.getElementById('submitBtn').disabled = true;
       selections = [];
       renderPlayerList(document.getElementById('searchBox').value);
