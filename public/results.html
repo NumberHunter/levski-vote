@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ПФК Левски София – Класиране</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0a0a1a;
+      color: #e8e8f0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #003399 0%, #0044cc 60%, #0055ff 100%);
+      padding: 24px 20px;
+      text-align: center;
+      border-bottom: 3px solid #ffd700;
+      box-shadow: 0 4px 20px rgba(0, 51, 153, 0.5);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    header p { color: #ccd9ff; margin-top: 6px; font-size: 0.95rem; }
+
+    .badge {
+      display: inline-block;
+      background: #ffd700;
+      color: #003399;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 2px 10px;
+      border-radius: 20px;
+      margin-top: 10px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 30px 16px 60px;
+    }
+
+    .meta-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .vote-count {
+      color: #7aa0ff;
+      font-size: 0.9rem;
+    }
+
+    .vote-count strong { color: #ffd700; font-size: 1.1rem; }
+
+    .btn-refresh {
+      background: rgba(0, 85, 255, 0.2);
+      border: 1px solid rgba(0, 85, 255, 0.4);
+      color: #7aa0ff;
+      padding: 7px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.15s;
+    }
+
+    .btn-refresh:hover {
+      background: rgba(0, 85, 255, 0.35);
+      color: #fff;
+    }
+
+    .leaderboard {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .entry {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      transition: background 0.15s;
+    }
+
+    .entry:hover { background: rgba(255,255,255,0.07); }
+
+    .entry.top1 {
+      background: rgba(255, 215, 0, 0.1);
+      border-color: rgba(255, 215, 0, 0.35);
+    }
+
+    .entry.top2 {
+      background: rgba(192, 192, 192, 0.08);
+      border-color: rgba(192, 192, 192, 0.25);
+    }
+
+    .entry.top3 {
+      background: rgba(205, 127, 50, 0.1);
+      border-color: rgba(205, 127, 50, 0.3);
+    }
+
+    .rank-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .rank-1  { background: #ffd700; color: #222; }
+    .rank-2  { background: #c0c0c0; color: #222; }
+    .rank-3  { background: #cd7f32; color: #fff; }
+    .rank-other { background: rgba(255,255,255,0.08); color: #888; }
+
+    .entry-name {
+      flex: 1;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .bar-wrapper {
+      flex: 2;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #003399, #0099ff);
+      transition: width 0.6s ease;
+    }
+
+    .top1 .bar-fill { background: linear-gradient(90deg, #b8860b, #ffd700); }
+    .top2 .bar-fill { background: linear-gradient(90deg, #888, #ccc); }
+    .top3 .bar-fill { background: linear-gradient(90deg, #7a4a1e, #cd7f32); }
+
+    .entry-pts {
+      font-weight: 800;
+      font-size: 1rem;
+      color: #ffd700;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .pts-label {
+      font-size: 0.7rem;
+      color: #556;
+      font-weight: 400;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #445;
+    }
+
+    .empty-state p { font-size: 1.1rem; margin-bottom: 8px; }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 4px;
+      color: #7aa0ff;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .back-link:hover { text-decoration: underline; }
+
+    .loading { text-align: center; padding: 40px; color: #445; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>&#127942; Класиране за сезона</h1>
+  <p>ПФК Левски София – Играч на сезона</p>
+  <span class="badge">2025 / 2026 &#8226; НА ЖИВО</span>
+</header>
+
+<div class="container">
+  <div class="meta-bar">
+    <div class="vote-count" id="voteCount">Зареждане...</div>
+    <button class="btn-refresh" onclick="loadResults()">&#8635; Обнови</button>
+  </div>
+
+  <div class="leaderboard" id="leaderboard">
+    <div class="loading">Зареждане на резултатите...</div>
+  </div>
+
+  <div style="margin-top: 28px; text-align: center;">
+    <a class="back-link" href="/">&#8592; Обратно към гласуването</a>
+  </div>
+</div>
+
+<script>
+async function loadResults() {
+  const lb = document.getElementById('leaderboard');
+  lb.innerHTML = '<div class="loading">Зареждане...</div>';
+
+  try {
+    const res = await fetch('/api/results');
+    const { results, voteCount } = await res.json();
+
+    document.getElementById('voteCount').innerHTML =
+      `Общо гласове: <strong>${voteCount}</strong>`;
+
+    if (!results || results.length === 0) {
+      lb.innerHTML = `
+        <div class="empty-state">
+          <p>Все още няма гласове.</p>
+          <p>Бъдете първите, които гласуват!</p>
+        </div>`;
+      return;
+    }
+
+    const maxPts = results[0].points;
+    lb.innerHTML = '';
+
+    results.forEach(({ player, points }, index) => {
+      const rank = index + 1;
+      let rankClass = 'rank-other';
+      let entryClass = '';
+      if (rank === 1) { rankClass = 'rank-1'; entryClass = 'top1'; }
+      else if (rank === 2) { rankClass = 'rank-2'; entryClass = 'top2'; }
+      else if (rank === 3) { rankClass = 'rank-3'; entryClass = 'top3'; }
+
+      const pct = Math.round((points / maxPts) * 100);
+
+      const div = document.createElement('div');
+      div.className = `entry ${entryClass}`;
+      div.innerHTML = `
+        <div class="rank-badge ${rankClass}">${rank}</div>
+        <div class="entry-name">${player}</div>
+        <div class="bar-wrapper">
+          <div class="bar-fill" style="width: ${pct}%"></div>
+        </div>
+        <div class="entry-pts">${points} <span class="pts-label">т.</span></div>
+      `;
+      lb.appendChild(div);
+    });
+  } catch (e) {
+    lb.innerHTML = '<div class="loading">Неуспешно зареждане на резултатите.</div>';
+  }
+}
+
+loadResults();
+</script>
+</body>
+</html>

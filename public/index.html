@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ПФК Левски София – Играч на сезона</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0a0a1a;
+      color: #e8e8f0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #003399 0%, #0044cc 60%, #0055ff 100%);
+      padding: 24px 20px;
+      text-align: center;
+      border-bottom: 3px solid #ffd700;
+      box-shadow: 0 4px 20px rgba(0, 51, 153, 0.5);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    header p {
+      margin-top: 6px;
+      color: #ccd9ff;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #ffd700;
+      color: #003399;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 2px 10px;
+      border-radius: 20px;
+      margin-top: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 16px 60px;
+    }
+
+    .instructions {
+      background: rgba(0, 51, 153, 0.2);
+      border: 1px solid rgba(0, 85, 255, 0.3);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #b0c4ff;
+    }
+
+    .instructions strong { color: #ffd700; }
+
+    .points-key {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .points-key span {
+      background: rgba(255,215,0,0.15);
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
+      color: #ffd700;
+      font-weight: 600;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 640px) {
+      .layout { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.4rem; }
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .panel h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #7aa0ff;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 9px 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: #e8e8f0;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      outline: none;
+    }
+
+    .search-box:focus {
+      border-color: #0055ff;
+      background: rgba(0,85,255,0.1);
+    }
+
+    .search-box::placeholder { color: #556; }
+
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .player-list::-webkit-scrollbar { width: 6px; }
+    .player-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
+    .player-list::-webkit-scrollbar-thumb { background: #003399; border-radius: 3px; }
+
+    .player-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .player-item:hover {
+      background: rgba(0, 85, 255, 0.2);
+      border-color: rgba(0, 85, 255, 0.4);
+    }
+
+    .player-item.selected {
+      background: rgba(0, 51, 153, 0.35);
+      border-color: #0055ff;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .player-number {
+      font-size: 0.75rem;
+      color: #556;
+      width: 22px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .player-name { font-size: 0.92rem; flex: 1; }
+    .player-pos {
+      font-size: 0.72rem;
+      color: #7aa0ff;
+      background: rgba(0,85,255,0.15);
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+
+    .player-departed {
+      font-size: 0.68rem;
+      color: #cc8844;
+      background: rgba(200, 120, 0, 0.15);
+      border: 1px solid rgba(200,120,0,0.25);
+      border-radius: 4px;
+      padding: 2px 6px;
+      white-space: nowrap;
+    }
+
+    .ranking-slots {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .slot {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 9px;
+      border: 2px dashed rgba(255,255,255,0.12);
+      min-height: 52px;
+      transition: all 0.15s;
+    }
+
+    .slot.filled {
+      border-style: solid;
+      border-color: #0044cc;
+      background: rgba(0, 68, 204, 0.15);
+    }
+
+    .slot-rank {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .rank-1 { background: #ffd700; color: #222; }
+    .rank-2 { background: #c0c0c0; color: #222; }
+    .rank-3 { background: #cd7f32; color: #fff; }
+    .rank-4 { background: #334; color: #aaa; }
+    .rank-5 { background: #223; color: #aaa; }
+
+    .slot-label {
+      flex: 1;
+      font-size: 0.9rem;
+    }
+
+    .slot-pts {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #ffd700;
+      background: rgba(255,215,0,0.1);
+      border-radius: 5px;
+      padding: 2px 8px;
+    }
+
+    .slot-remove {
+      background: none;
+      border: none;
+      color: #556;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+
+    .slot-remove:hover { color: #ff4466; }
+
+    .empty-label {
+      color: #445;
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    .submit-area {
+      margin-top: 28px;
+      text-align: center;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #003399, #0055ff);
+      color: #fff;
+      border: none;
+      padding: 14px 48px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(0,85,255,0.3);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(0,85,255,0.5);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .msg {
+      margin-top: 16px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .msg.success {
+      background: rgba(0, 200, 100, 0.15);
+      border: 1px solid rgba(0, 200, 100, 0.4);
+      color: #00cc66;
+      display: block;
+    }
+
+    .msg.error {
+      background: rgba(255, 50, 50, 0.15);
+      border: 1px solid rgba(255, 50, 50, 0.4);
+      color: #ff5566;
+      display: block;
+    }
+
+    .results-link {
+      display: inline-block;
+      margin-top: 12px;
+      color: #7aa0ff;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .results-link:hover { text-decoration: underline; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>&#9733; ПФК Левски София – Играч на сезона &#9733;</h1>
+  <p>Гласувайте за най-добрите играчи на сезона</p>
+  <span class="badge">СЕЗОН 2025 / 2026</span>
+</header>
+
+<div class="container">
+  <div class="instructions">
+    <strong>Как да гласувате:</strong> Кликнете върху играчи от списъка, за да наредите своя <strong>Топ 5</strong> по ред.<br>
+    Първият ви избор носи <strong>5 точки</strong>, вторият – <strong>4</strong>, и така до <strong>1 точка</strong> за 5-ия.<br>
+    <div class="points-key">
+      <span>1-ви &#8594; 5 т.</span>
+      <span>2-ри &#8594; 4 т.</span>
+      <span>3-ти &#8594; 3 т.</span>
+      <span>4-ти &#8594; 2 т.</span>
+      <span>5-ти &#8594; 1 т.</span>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <h2>Отбор</h2>
+      <input class="search-box" type="text" id="searchBox" placeholder="Търси играч..." />
+      <div class="player-list" id="playerList"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Вашият Топ 5</h2>
+      <div class="ranking-slots" id="rankingSlots"></div>
+    </div>
+  </div>
+
+  <div class="submit-area">
+    <button class="btn-submit" id="submitBtn" disabled>Изпрати глас</button>
+    <div class="msg" id="msg"></div>
+    <a class="results-link" href="/results.html">Виж текущото класиране &#8594;</a>
+  </div>
+</div>
+
+<script>
+// departed: true = напуснал в зимния прозорец на 2026
+const PLAYERS = [
+  // ── Вратари ───────────────────────────────────────────────
+  { name: "Светослав Вуцов",        pos: "ВРТ", num: 92 },
+  { name: "Мартин Луков",           pos: "ВРТ", num: 78 },
+  // ── Защитници ─────────────────────────────────────────────
+  { name: "Кристиан Макун",         pos: "ЗАЩ", num: 4  },
+  { name: "Кристиан Димитров",      pos: "ЗАЩ", num: 50 },
+  { name: "Никола Серафимов",       pos: "ЗАЩ", num: 31 },
+  { name: "Стипе Вуликич",          pos: "ЗАЩ", num: 6  },
+  { name: "Майкон",                 pos: "ЗАЩ", num: 3  },
+  { name: "Алдаир",                 pos: "ЗАЩ", num: 21 },
+  { name: "Оливер Камдем",          pos: "ЗАЩ", num: 71 },
+  // ── Полузащитници ─────────────────────────────────────────
+  { name: "Гашпер Търдин",          pos: "ПОЛ", num: 18 },
+  { name: "Георги Костадинов",      pos: "ПОЛ", num: 70 },
+  { name: "Акрам Бурас",            pos: "ПОЛ", num: 47 },
+  { name: "Асен Митков",            pos: "ПОЛ", num: 10 },
+  { name: "Карлос Охене",           pos: "ПОЛ", num: 8  },
+  { name: "Мазир Сула",             pos: "ПОЛ", num: 22 },
+  { name: "Рилдо",                  pos: "ПОЛ", num: 37 },
+  { name: "Патрик Мислович",        pos: "ПОЛ", num: 23, departed: true },
+  { name: "Цунами",                 pos: "ЗАЩ", num: 6,  departed: true },
+  // ── Нападатели ────────────────────────────────────────────
+  { name: "Евертон Бала",           pos: "НАП", num: 17 },
+  { name: "Армстронг Око-Флекс",    pos: "НАП", num: 11 },
+  { name: "Радослав Кирилов",       pos: "НАП", num: 99 },
+  { name: "Карл Фабиен",            pos: "НАП", num: 95 },
+  { name: "Хуан Переа",             pos: "НАП", num: 9  },
+  { name: "Мустафа Сангаре",        pos: "НАП", num: 12 },
+  { name: "Марко Дуганджич",        pos: "НАП", num: 45 },
+  { name: "Марин Петков",           pos: "НАП", num: 88, departed: true },
+  { name: "Фабио Лима",             pos: "НАП", num: 7,  departed: true },
+  { name: "Борислав Рупанов",       pos: "НАП", num: 77, departed: true },
+];
+
+const MAX_PICKS = 5;
+const POINTS_MAP = [5, 4, 3, 2, 1];
+let selections = [];
+
+function renderPlayerList(filter = '') {
+  const list = document.getElementById('playerList');
+  list.innerHTML = '';
+  const lower = filter.toLowerCase();
+  const filtered = PLAYERS.filter(p => p.name.toLowerCase().includes(lower));
+  filtered.forEach((p) => {
+    const div = document.createElement('div');
+    div.className = 'player-item' + (selections.includes(p.name) ? ' selected' : '');
+    div.innerHTML = `
+      <span class="player-number">${p.num}</span>
+      <span class="player-name">${p.name}</span>
+      <span class="player-pos">${p.pos}</span>
+    `;
+    if (!selections.includes(p.name)) {
+      div.addEventListener('click', () => addPlayer(p.name));
+    }
+    list.appendChild(div);
+  });
+}
+
+function renderSlots() {
+  const container = document.getElementById('rankingSlots');
+  container.innerHTML = '';
+  for (let i = 0; i < MAX_PICKS; i++) {
+    const slot = document.createElement('div');
+    const filled = i < selections.length;
+    slot.className = 'slot' + (filled ? ' filled' : '');
+
+    const rankClass = `rank-${i + 1}`;
+    const pts = POINTS_MAP[i];
+
+    slot.innerHTML = `
+      <div class="slot-rank ${rankClass}">${i + 1}</div>
+      <div class="slot-label">
+        ${filled
+          ? `<strong>${selections[i]}</strong>`
+          : `<span class="empty-label">Кликнете, за да добавите играч</span>`}
+      </div>
+      ${filled ? `<span class="slot-pts">${pts} т.</span>` : ''}
+      ${filled ? `<button class="slot-remove" data-index="${i}" title="Премахни">&#10005;</button>` : ''}
+    `;
+    container.appendChild(slot);
+  }
+
+  container.querySelectorAll('.slot-remove').forEach(btn => {
+    btn.addEventListener('click', () => removePlayer(parseInt(btn.dataset.index)));
+  });
+
+  document.getElementById('submitBtn').disabled = selections.length < MAX_PICKS;
+}
+
+function addPlayer(name) {
+  if (selections.length >= MAX_PICKS || selections.includes(name)) return;
+  selections.push(name);
+  renderPlayerList(document.getElementById('searchBox').value);
+  renderSlots();
+}
+
+function removePlayer(index) {
+  selections.splice(index, 1);
+  renderPlayerList(document.getElementById('searchBox').value);
+  renderSlots();
+}
+
+document.getElementById('searchBox').addEventListener('input', e => {
+  renderPlayerList(e.target.value);
+});
+
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const msgEl = document.getElementById('msg');
+  msgEl.className = 'msg';
+  msgEl.textContent = '';
+
+  try {
+    const res = await fetch('/api/vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ selections }),
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      msgEl.className = 'msg success';
+      msgEl.textContent = '✓ Вашият глас е записан! Благодарим ви.';
+      selections = [];
+      renderPlayerList(document.getElementById('searchBox').value);
+      renderSlots();
+    } else {
+      msgEl.className = 'msg error';
+      msgEl.textContent = data.error || 'Нещо се обърка. Опитайте отново.';
+    }
+  } catch (e) {
+    msgEl.className = 'msg error';
+    msgEl.textContent = 'Не може да се свърже със сървъра.';
+  }
+});
+
+renderPlayerList();
+renderSlots();
+</script>
+</body>
+</html>
