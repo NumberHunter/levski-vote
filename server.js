@@ -56,6 +56,17 @@ app.get('/api/results', (req, res) => {
   res.json({ results: sorted, voteCount: data.voteCount });
 });
 
+app.get('/api/download-results', (req, res) => {
+  const data = loadVotes();
+  const sorted = Object.entries(data.totals)
+    .sort((a, b) => b[1] - a[1])
+    .map(([player, points]) => ({ player, points }));
+  const export_data = { voteCount: data.voteCount, results: sorted, exportedAt: new Date().toISOString() };
+  res.setHeader('Content-Disposition', 'attachment; filename="levski-vote-results.json"');
+  res.setHeader('Content-Type', 'application/json');
+  res.send(JSON.stringify(export_data, null, 2));
+});
+
 app.listen(PORT, () => {
   console.log(`Levski Vote app running at http://localhost:${PORT}`);
   console.log(`Results stored in: ${VOTES_FILE}`);
