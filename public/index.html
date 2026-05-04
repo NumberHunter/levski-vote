@@ -371,7 +371,6 @@
   <div class="submit-area">
     <button class="btn-submit" id="submitBtn" disabled>Изпрати глас</button>
     <div class="msg" id="msg"></div>
-    <a class="results-link" href="/results.html">Виж текущото класиране &#8594;</a>
   </div>
 </div>
 
@@ -500,6 +499,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     if (res.ok) {
       msgEl.className = 'msg success';
       msgEl.textContent = '✓ Вашият глас е записан! Благодарим ви.';
+      document.getElementById('submitBtn').disabled = true;
       selections = [];
       renderPlayerList(document.getElementById('searchBox').value);
       renderSlots();
