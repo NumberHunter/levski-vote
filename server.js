@@ -1,12 +1,16 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const VOTES_FILE = path.join(__dirname, 'votes.json');
+const COOKIE_NAME = 'levski_voted';
+const COOKIE_MAX_AGE = 365 * 24 * 60 * 60 * 1000;
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 function loadVotes() {
@@ -23,16 +27,24 @@ function saveVotes(data) {
 // Points: 1st = 5pts, 2nd = 4pts, 3rd = 3pts, 4th = 2pts, 5th = 1pt
 const POINTS = [5, 4, 3, 2, 1];
 
+app.get('/api/check-voted', (req, res) => {
+  res.json({ voted: !!req.cookies[COOKIE_NAME] });
+});
+
 app.post('/api/vote', (req, res) => {
+  if (req.cookies[COOKIE_NAME]) {
+    return res.status(403).json({ error: 'Вече сте гласували. Може да гласувате само веднъж.' });
+  }
+
   const { selections } = req.body;
 
   if (!Array.isArray(selections) || selections.length !== 5) {
-    return res.status(400).json({ error: 'You must select exactly 5 players.' });
+    return res.status(400).json({ error: 'Трябва да изберете точно 5 играча.' });
   }
 
   const unique = new Set(selections);
   if (unique.size !== 5) {
-    return res.status(400).json({ error: 'All 5 selections must be different players.' });
+    return res.status(400).json({ error: 'Всичките 5 играча трябва да са различни.' });
   }
 
   const data = loadVotes();
@@ -45,7 +57,13 @@ app.post('/api/vote', (req, res) => {
   data.voteCount = (data.voteCount || 0) + 1;
   saveVotes(data);
 
-  res.json({ success: true, message: 'Vote recorded!' });
+  res.cookie(COOKIE_NAME, '1', {
+    maxAge: COOKIE_MAX_AGE,
+    httpOnly: true,
+    sameSite: 'lax',
+  });
+
+  res.json({ success: true, message: 'Гласът е записан!' });
 });
 
 app.get('/api/results', (req, res) => {
@@ -67,7 +85,7 @@ app.get('/api/download-results', (req, res) => {
   res.send(JSON.stringify(export_data, null, 2));
 });
 
-app.listen(PORT, () => {
-  console.log(`Levski Vote app running at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Levski Vote app running on port ${PORT}`);
   console.log(`Results stored in: ${VOTES_FILE}`);
 });
