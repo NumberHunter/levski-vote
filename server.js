@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const VOTES_FILE = path.join(__dirname, 'votes.json');
 
 app.use(express.json());
@@ -67,7 +67,7 @@ app.get('/api/download-results', (req, res) => {
   res.send(JSON.stringify(export_data, null, 2));
 });
 
-app.listen(PORT, () => {
-  console.log(`Levski Vote app running at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Levski Vote app running on port ${PORT}`);
   console.log(`Results stored in: ${VOTES_FILE}`);
 });
